@@ -1,37 +1,69 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/alexpfx/go_sh/common/util"
 	"github.com/alexpfx/go_sh/dotfile/internal/dotfile"
+	"github.com/urfave/cli/v2"
+	"log"
 	"os"
-	"path/filepath"
 )
 
 const git = "/usr/bin/git"
 const defaultAlias = "cfg"
+const defaultRepo = "https://github.com/alexpfx/linux_dotfiles.git"
+const defaultGitdir = ".cfg"
+
+var version = "development"
+var buildTime = "N\\A"
 
 func main() {
-
-	var repo string
-	var gitDir string
-	var workTree string
-	var alias string
-	var force bool
-
-	h, err := os.UserHomeDir()
-
+	homeDir, err := os.UserHomeDir()
 	util.CheckFatal(err, "")
 
+	app := &cli.App{
+		Name: "cfg_repo",
+		Usage: "init a repository",
+		Commands: []*cli.Command{
+			{
+				Name: "version", Usage: "print build version and exit",
+				Action: func(context *cli.Context) error {
+					printVersionAndExit()
+					return nil
+				},
+			},
+			{
+				Name: "init", Usage: "init a repo",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "alias", Aliases: []string{"a"}, Usage: "command alias", Value: defaultAlias},
+					&cli.BoolFlag{Name: "force", Aliases: []string{"f"}, Usage: "remove ditDir if it exinitCmd.BoolVar already exists", Value: false},
+					&cli.StringFlag{Name: "repository", Aliases: []string{"r"}, Usage: "repository", Value: defaultRepo},
+					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir", Value: defaultGitdir},
+					&cli.StringFlag{Name: "workTree", Aliases: []string{"t"}, Usage: "workTree", Value: homeDir},
+				},
+				Action: func(c *cli.Context) error {
+					initRepoCmd(
+						c.String("repo"),
+						c.String("gitDir"),
+						c.String("workTree"),
+						c.String("alias"),
+						c.Bool("force"),
+					)
 
-	flag.StringVar(&repo, "r", "https://github.com/alexpfx/linux_dotfiles.git", "repository")
-	flag.StringVar(&gitDir, "d", filepath.Join(h, ".cfg"), "gitDir")
-	flag.StringVar(&workTree, "t", h, "workTree")
-	flag.StringVar(&alias, "a", defaultAlias, "command alias")
-	flag.BoolVar(&force, "f", false, "remove ditDir if it exists")
-	flag.Parse()
+					return nil
+				},
+			},
+		},
+	}
 
+	err = app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func initRepoCmd(repo, gitDir, workTree, alias string, force bool) {
 	conf := dotfile.Config{
 		WorkTree: workTree,
 		GitDir:   gitDir,
@@ -54,11 +86,15 @@ func main() {
 
 	dotfile.WriteConfig(alias, &conf)
 
-	checkout(alias, aliasArgs, workTree, &conf)
-
+	checkout(alias, aliasArgs, workTree)
 }
 
-func checkout(alias string, aliasArgs []string, workTree string, conf *dotfile.Config) {
+func printVersionAndExit() {
+	fmt.Printf("	Version: %s\n	Build time: %s", version, buildTime)
+	os.Exit(0)
+}
+
+func checkout(alias string, aliasArgs []string, workTree string) {
 	var existUntracked []string
 	_, serr, err := util.ExecCmd(git, append(aliasArgs, "checkout"))
 
@@ -77,5 +113,6 @@ func checkout(alias string, aliasArgs []string, workTree string, conf *dotfile.C
 		_, serr, err = util.ExecCmd(git, append(aliasArgs, "checkout"))
 		util.CheckFatal(err, serr)
 	}
-
 }
+
+// 113
