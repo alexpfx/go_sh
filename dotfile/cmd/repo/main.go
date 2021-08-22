@@ -25,7 +25,7 @@ func main() {
 	util.CheckFatal(err, "")
 
 
-	flag.StringVar(&repo, "r", "https://github.com/alexpfx/sway_dotfiles.git", "repository")
+	flag.StringVar(&repo, "r", "https://github.com/alexpfx/linux_dotfiles.git", "repository")
 	flag.StringVar(&gitDir, "d", filepath.Join(h, ".cfg"), "gitDir")
 	flag.StringVar(&workTree, "t", h, "workTree")
 	flag.StringVar(&alias, "a", defaultAlias, "command alias")

@@ -34,27 +34,23 @@ func QuoteArgs(args []string) []string {
 	return args
 }
 
-func MoveFile(targetPath string, originalPath string) {
+func MoveFile(originalPath string, targetPath string) {
+	err := os.MkdirAll(filepath.Dir(targetPath), 0700)
+	CheckFatal(err, "")
 
 	originalFile, err := os.Open(originalPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer originalFile.Close()
-	defer os.Remove(originalFile.Name())
+	CheckFatal(err, "")
 
 	copyFile, err := os.Create(targetPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer copyFile.Close()
+	CheckFatal(err, "")
 
 	_, err = io.Copy(copyFile, originalFile)
+	CheckFatal(err, "")
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = copyFile.Close()
+	CheckFatal(err, "")
+	originalFile.Close()
+	os.Remove(originalFile.Name())
 }
 
 func ExecCmd(cmdStr string, args []string) (stdout string, stderr string, err error) {
@@ -102,6 +98,5 @@ func CheckFatal(err error, errMsg string) {
 		log.Fatal(err.Error())
 		return
 	}
-	log.Fatal(errMsg, " ", err.Error())
-
+	log.Fatal(errMsg)
 }

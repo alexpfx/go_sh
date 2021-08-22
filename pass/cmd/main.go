@@ -15,9 +15,13 @@ func main() {
 
 	homeDir, _ := os.UserHomeDir()
 	var defaultPasswordStore = filepath.Join(homeDir, ".password-store/")
+	//currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	//util.CheckFatal(err, "error when get current directory")
+
+	var defaultRestoreDir = filepath.Join(homeDir, "pass_restore/")
 	var debugMode bool
 	app := &cli.App{
-		Name:  "go_shell",
+		Name:  "go_pass",
 		Usage: "scripts de linux",
 		Commands: []*cli.Command{
 			{
@@ -42,17 +46,16 @@ func main() {
 							&cli.BoolFlag{
 								Name:    "update",
 								Aliases: []string{"U"},
-								Value:   false,
+								Value:   true,
 							},
 							&cli.StringFlag{
 								Name:  "prefix",
 								Value: "restored/",
 							},
 							&cli.StringFlag{
-								Name:    "password-store",
+								Name:    "restore-dir",
 								Aliases: []string{"d"},
-								EnvVars: []string{"PASSWORD_STORE_DIR"},
-								Value:   defaultPasswordStore,
+								Value:   defaultRestoreDir,
 							},
 							&cli.StringFlag{
 								Name:    "public-key",
@@ -61,12 +64,11 @@ func main() {
 							},
 						},
 						Action: func(c *cli.Context) error {
-							target := c.String("backup-file")
-							passwordStore := c.String("password-store")
-							prefix := c.String("prefix")
+							backupFile := c.String("backup-file")
+							targetDir := c.String("restore-dir")
 							forceUpdate := c.Bool("update")
 
-							restore := pass.NewRestore(prefix, passwordStore, target, forceUpdate)
+							restore := pass.NewRestore(targetDir, backupFile, forceUpdate)
 							restore.Do()
 
 							return nil
@@ -110,6 +112,7 @@ func main() {
 			&cli.BoolFlag{
 				Name:        "debug",
 				Aliases:     []string{"D"},
+				Value: false,
 				Destination: &debugMode,
 			},
 		},
