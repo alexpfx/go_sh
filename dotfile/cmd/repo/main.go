@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 const git = "/usr/bin/git"
@@ -22,7 +23,7 @@ func main() {
 	util.CheckFatal(err, "")
 
 	app := &cli.App{
-		Name: "cfg_repo",
+		Name: "repocfg",
 		Usage: "init a repository",
 		Commands: []*cli.Command{
 			{
@@ -36,14 +37,14 @@ func main() {
 				Name: "init", Usage: "init a repo",
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "alias", Aliases: []string{"a"}, Usage: "command alias", Value: defaultAlias},
-					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir", Value: defaultGitdir},
+					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir", Value: filepath.Join(homeDir, defaultGitdir)},
 					&cli.StringFlag{Name: "workTree", Aliases: []string{"t"}, Usage: "workTree", Value: homeDir},
 					&cli.BoolFlag{Name: "force", Aliases: []string{"f"}, Usage: "remove ditDir if it exinitCmd.BoolVar already exists", Value: false},
 					&cli.StringFlag{Name: "repository", Aliases: []string{"r"}, Usage: "repository", Value: defaultRepo},
 				},
 				Action: func(c *cli.Context) error {
 					initRepoCmd(
-						c.String("repo"),
+						c.String("repository"),
 						c.String("gitDir"),
 						c.String("workTree"),
 						c.String("alias"),
@@ -64,6 +65,8 @@ func main() {
 }
 
 func initRepoCmd(repo, gitDir, workTree, alias string, force bool) {
+	fmt.Printf("repo: %s gitDir: %s workTree: %s alias: %s force:%v", repo, gitDir, workTree, alias, force)
+
 	conf := dotfile.Config{
 		WorkTree: workTree,
 		GitDir:   gitDir,
