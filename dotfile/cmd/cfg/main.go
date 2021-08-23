@@ -12,69 +12,76 @@ import (
 )
 
 const git = "/usr/bin/git"
+const defaultRepo = "https://github.com/alexpfx/linux_dotfiles.git"
+const defaultGitdir = ".cfg"
 const defaultAlias = "cfg"
 
 var version = "development"
 var buildTime = "N\\A"
 
 func main() {
+	homeDir, err := os.UserHomeDir()
+	util.CheckFatal(err, "")
+
 	app := &cli.App{
-		Name:  "cfg_repo",
-		Usage: "init a repository",
+		Name: "cfg", Usage: "cfg",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "alias", Aliases: []string{"a"}, Usage: "command alias", Value: defaultAlias},
+			&cli.BoolFlag{Name: "version", Aliases: []string{"v"}, Usage: "print version and exit", Value: false},
+		},
+		Action: func(c *cli.Context) error {
+
+			if c.Bool("version") {
+				printVersionAndExit()
+			}
+			conf := dotfile.LoadConfig(c.String("alias"))
+			tail := c.Args().Slice()
+
+
+			aliasArgs := []string{
+				"--git-dir=" + conf.GitDir + "/",
+				"--work-tree=" + conf.WorkTree,
+			}
+
+			if len(tail) == 0 {
+				return nil
+			}
+			out, stderr, err := util.ExecCmd(git, append(aliasArgs, tail...))
+			util.CheckFatal(err, stderr)
+			fmt.Println(out)
+
+			return nil
+		},
 		Commands: []*cli.Command{
 			{
-				Name: "version", Usage: "print build version and exit",
-				Action: func(context *cli.Context) error {
-					printVersionAndExit()
-					return nil
-				},
-			},
-			{
-				Name: "cfg", Usage: "cfg",
+				Name: "update",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "alias", Aliases: []string{"a"}, Usage: "command alias", Value: defaultAlias},
-					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir"},
-					&cli.StringFlag{Name: "workTree", Aliases: []string{"t"}, Usage: "workTree"},
-					&cli.BoolFlag{Name: "update_config", Aliases: []string{"u"}, Usage: "write new config file and exit", Value: false},
+					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir", Value: defaultGitdir},
+					&cli.StringFlag{Name: "workTree", Aliases: []string{"t"}, Usage: "workTree", Value: homeDir},
 				},
 				Action: func(c *cli.Context) error {
-					updateConfig := c.Bool("update_config")
 					gitDir := c.String("gitDir")
 					workTree := c.String("workTree")
 					alias := c.String("alias")
 
-					if updateConfig {
-						checkArgs(gitDir, workTree, alias)
-						conf := dotfile.Config{
-							WorkTree: workTree,
-							GitDir:   gitDir,
-						}
-						dotfile.WriteConfig(alias, &conf)
-						return nil
+					fmt.Println(gitDir)
+					fmt.Println(workTree)
+					fmt.Println(alias)
+					checkArgs(gitDir, workTree, alias)
+					conf := dotfile.Config{
+						WorkTree: workTree,
+						GitDir:   gitDir,
 					}
-
-					tail := c.Args().Tail()
-					conf := dotfile.LoadConfig(alias)
-
-					aliasArgs := []string{
-						"--git-dir=" + conf.GitDir + "/",
-						"--work-tree=" + conf.WorkTree,
-					}
-
-					if len(tail) == 0 {
-						return nil
-					}
-					out, stderr, err := util.ExecCmd(git, append(aliasArgs, tail...))
-					util.CheckFatal(err, stderr)
-					fmt.Println(out)
+					dotfile.WriteConfig(alias, &conf)
 
 					return nil
 				},
 			},
 		},
+
 	}
 
-	err := app.Run(os.Args)
+	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
