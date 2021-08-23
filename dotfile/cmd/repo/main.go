@@ -36,10 +36,10 @@ func main() {
 				Name: "init", Usage: "init a repo",
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "alias", Aliases: []string{"a"}, Usage: "command alias", Value: defaultAlias},
-					&cli.BoolFlag{Name: "force", Aliases: []string{"f"}, Usage: "remove ditDir if it exinitCmd.BoolVar already exists", Value: false},
-					&cli.StringFlag{Name: "repository", Aliases: []string{"r"}, Usage: "repository", Value: defaultRepo},
 					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir", Value: defaultGitdir},
 					&cli.StringFlag{Name: "workTree", Aliases: []string{"t"}, Usage: "workTree", Value: homeDir},
+					&cli.BoolFlag{Name: "force", Aliases: []string{"f"}, Usage: "remove ditDir if it exinitCmd.BoolVar already exists", Value: false},
+					&cli.StringFlag{Name: "repository", Aliases: []string{"r"}, Usage: "repository", Value: defaultRepo},
 				},
 				Action: func(c *cli.Context) error {
 					initRepoCmd(
@@ -115,4 +115,3 @@ func checkout(alias string, aliasArgs []string, workTree string) {
 	}
 }
 
-// 113

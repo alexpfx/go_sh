@@ -1,9 +1,10 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/alexpfx/go_sh/common/util"
+	"github.com/urfave/cli/v2"
+	"os"
 
 	"github.com/alexpfx/go_sh/dotfile/internal/dotfile"
 
@@ -11,52 +12,72 @@ import (
 )
 
 const git = "/usr/bin/git"
-
 const defaultAlias = "cfg"
 
+var version = "development"
+var buildTime = "N\\A"
+
 func main() {
-	var gitDir string
-	var workTree string
-	var alias string
-	var updateConfig bool
-	var help bool
+	app := &cli.App{
+		Name:  "cfg_repo",
+		Usage: "init a repository",
+		Commands: []*cli.Command{
+			{
+				Name: "version", Usage: "print build version and exit",
+				Action: func(context *cli.Context) error {
+					printVersionAndExit()
+					return nil
+				},
+			},
+			{
+				Name: "cfg", Usage: "cfg",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "alias", Aliases: []string{"a"}, Usage: "command alias", Value: defaultAlias},
+					&cli.StringFlag{Name: "gitDir", Aliases: []string{"d"}, Usage: "git dir"},
+					&cli.StringFlag{Name: "workTree", Aliases: []string{"t"}, Usage: "workTree"},
+					&cli.BoolFlag{Name: "update_config", Aliases: []string{"u"}, Usage: "write new config file and exit", Value: false},
+				},
+				Action: func(c *cli.Context) error {
+					updateConfig := c.Bool("update_config")
+					gitDir := c.String("gitDir")
+					workTree := c.String("workTree")
+					alias := c.String("alias")
 
-	flag.StringVar(&gitDir, "d", "", "gitDir")
-	flag.StringVar(&workTree, "t", "", "workTree")
-	flag.StringVar(&alias, "a", defaultAlias, "command alias")
-	flag.BoolVar(&updateConfig, "u", false, "write new config file and exit")
-	flag.BoolVar(&help, "h", false, "print usage and exit")
+					if updateConfig {
+						checkArgs(gitDir, workTree, alias)
+						conf := dotfile.Config{
+							WorkTree: workTree,
+							GitDir:   gitDir,
+						}
+						dotfile.WriteConfig(alias, &conf)
+						return nil
+					}
 
-	flag.Parse()
+					tail := c.Args().Tail()
+					conf := dotfile.LoadConfig(alias)
 
-	if help {
-		flag.PrintDefaults()
-		return
+					aliasArgs := []string{
+						"--git-dir=" + conf.GitDir + "/",
+						"--work-tree=" + conf.WorkTree,
+					}
+
+					if len(tail) == 0 {
+						return nil
+					}
+					out, stderr, err := util.ExecCmd(git, append(aliasArgs, tail...))
+					util.CheckFatal(err, stderr)
+					fmt.Println(out)
+
+					return nil
+				},
+			},
+		},
 	}
 
-	if updateConfig {
-		checkArgs(gitDir, workTree, alias)
-		conf := dotfile.Config{
-			WorkTree: workTree,
-			GitDir:   gitDir,
-		}
-		dotfile.WriteConfig(alias, &conf)
-		return
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	conf := dotfile.LoadConfig(alias)
-
-	tail := flag.Args()
-	aliasArgs := []string{
-		"--git-dir=" + conf.GitDir + "/",
-		"--work-tree=" + conf.WorkTree,
-	}
-	if len(tail) == 0 {
-		return
-	}
-	out, stderr, err := util.ExecCmd(git, append(aliasArgs, tail...))
-	util.CheckFatal(err, stderr)
-	fmt.Println(out)
 }
 
 func checkArgs(args ...string) {
@@ -67,3 +88,9 @@ func checkArgs(args ...string) {
 	}
 
 }
+func printVersionAndExit() {
+	fmt.Printf("	Version: %s\n	Build time: %s", version, buildTime)
+	os.Exit(0)
+}
+
+//72
