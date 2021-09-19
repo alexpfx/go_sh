@@ -1,0 +1,8 @@
+[
+  {
+    "desc" : "Copiar Cpf Sem números",
+    "copy": "\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}",
+    "match": "[^0-9]",
+    "replace": ""
+  }
+]
