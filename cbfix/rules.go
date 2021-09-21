@@ -1,4 +1,4 @@
-package cb_fix
+package cbfix
 
 type Rule struct {
 	Desc string `json:"desc"`

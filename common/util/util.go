@@ -34,6 +34,13 @@ func QuoteArgs(args []string) []string {
 	return args
 }
 
+func ReadStin() string {
+	r := bufio.NewReader(os.Stdin)
+	text, _ := r.ReadString('\n')
+	return text
+
+}
+
 func MoveFile(originalPath string, targetPath string) {
 	err := os.MkdirAll(filepath.Dir(targetPath), 0700)
 	CheckFatal(err, "")
