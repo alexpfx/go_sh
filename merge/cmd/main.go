@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/alexpfx/go_sh/common/util"
 	"github.com/alexpfx/go_sh/merge"
 	"github.com/urfave/cli/v2"
@@ -9,22 +10,26 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 )
 
+
+//echo 10697 | merge | jq -r '[.merge.web_url, .merge.author.username, .merge.commit.username, .merge.commit.created_at] | @tsv' | xsel -b
 func main() {
 	var lastNumberRegex = regexp.MustCompile("[0-9]+")
 
 	configDir, err := os.UserConfigDir()
 	var configArg string
 	var input string
+	var token string
 
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:        "configArg",
+				Name:        "config",
 				Aliases:     []string{"c"},
 				Usage:       "caminho do arquivo de configuração",
-				FilePath:    filepath.Join(configDir, "go_sh/merge/configArg.json"),
+				FilePath:    filepath.Join(configDir, "go_sh/merge/config.json"),
 				TakesFile:   true,
 				Destination: &configArg,
 			},
@@ -37,6 +42,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:    "privateToken",
+				Destination: &token,
 				Usage:   "personal gitlab private token",
 				EnvVars: []string{"PRIVATE_TOKEN"},
 			},
@@ -48,7 +54,9 @@ func main() {
 
 			var config merge.Config
 
-			json.Unmarshal([]byte(configArg), &config)
+			err = json.Unmarshal([]byte(configArg), &config)
+
+			util.CheckFatal(err, "")
 
 			if &input == nil || input == "" {
 				input = util.ReadStin()
@@ -57,12 +65,20 @@ func main() {
 				return nil
 			}
 			mergeId := lastNumberRegex.FindString(input)
-
-			mr := merge.MrFetch{
-				Config: config,
+			_, err = strconv.Atoi(mergeId)
+			if err != nil {
+				fmt.Printf("Id inválido: %s ", mergeId)
 			}
 
-			mr.Fetch(mergeId)
+			mr := merge.Fetcher{
+				Config: config,
+				Token: token,
+			}
+
+			fetchResult := mr.Fetch(mergeId)
+			for _, r := range fetchResult {
+				fmt.Println(util.ToJsonStr(r))
+			}
 
 			return nil
 		},

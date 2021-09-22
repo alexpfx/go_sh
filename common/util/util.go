@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"io"
 	"log"
 	"os"
@@ -11,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+const devFormat = `.web_url .author.username .commit.username .commit.created_at`
 
 func ParseExistUntracked(workTree string, gitMessage string) []string {
 	scanner := bufio.NewScanner(strings.NewReader(gitMessage))
@@ -94,6 +97,14 @@ func FileExists(path string) bool {
 	}
 	return !stat.IsDir()
 
+}
+
+func ToJsonStr(results interface{}) string {
+	bytes, err := json.MarshalIndent(results, "", "   ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(bytes)
 }
 
 func CheckFatal(err error, errMsg string) {
