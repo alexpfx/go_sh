@@ -2,7 +2,6 @@ package passwrapper
 
 import (
 	"crypto/rand"
-	"fmt"
 	"github.com/alexpfx/go_sh/common/util"
 	"log"
 	"math/big"
@@ -69,7 +68,6 @@ func (p Pass) Generate() string {
 
 
 func shuffle(passrunes []rune) {
-	fmt.Println(string(passrunes))
 	mrand.Shuffle(len(passrunes), func(i, j int) {
 		passrunes[i], passrunes[j] = passrunes[j], passrunes[i]
 	})
