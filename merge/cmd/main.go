@@ -18,6 +18,8 @@ import (
 func main() {
 	var lastNumberRegex = regexp.MustCompile("[0-9]+")
 
+
+
 	configDir, err := os.UserConfigDir()
 	var configArg string
 	var input string
