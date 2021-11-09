@@ -66,7 +66,6 @@ func (p Pass) Generate() string {
 	return string(passrunes)
 }
 
-
 func shuffle(passrunes []rune) {
 	mrand.Shuffle(len(passrunes), func(i, j int) {
 		passrunes[i], passrunes[j] = passrunes[j], passrunes[i]

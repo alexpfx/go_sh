@@ -29,7 +29,6 @@ func main() {
 
 	var update bool
 
-
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
