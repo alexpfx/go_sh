@@ -16,3 +16,4 @@
 *.gpg
 .idea/
 mktplace/*
+vendor/
