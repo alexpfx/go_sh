@@ -8,3 +8,4 @@ FROM alpine:3.15
 WORKDIR /go/src/go_sh
 COPY --from=builder /go/src/go_sh .
 ENTRYPOINT ["./app" ]
+#
