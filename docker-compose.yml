@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  cbfix:
+    image: gosh/fix
+    build:
+      context: cbfix
+      target: app
+  merge:
+    image: gosh/merge
+    build: 
+      context: merge
+      target: app
+  pass-wrapper:
+    image: gosh/pw
+    build: 
+      context: passwrapper
+      target: app
