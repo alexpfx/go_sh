@@ -1,4 +1,4 @@
-module passwrapper
+module dotfile
 
 go 1.18
 

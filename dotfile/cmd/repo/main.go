@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/alexpfx/go_sh/common/util"
-	"github.com/alexpfx/go_sh/dotfile/internal/dotfile"
+	"dotfile"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"

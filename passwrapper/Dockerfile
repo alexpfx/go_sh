@@ -1,10 +1,10 @@
-FROM golang:1.18-rc as builder
+FROM golang:1.18-rc-alpine as builder
 WORKDIR /go/src/go_sh
 COPY . .
+RUN go get -d -v
+RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/app -ldflags="-s -w" cmd/main.go
 
-RUN GOOS=linux go build -o ./app -ldflags="-s -w" cmd/main.go
-
-FROM alpine:3.15
+FROM scratch
 WORKDIR /go/src/go_sh
-COPY --from=builder /go/src/go_sh .
-ENTRYPOINT ["./app" ]
+COPY --from=builder /go/bin/app /go/bin/app
+ENTRYPOINT [ "/go/bin/app" ]

@@ -1,4 +1,4 @@
-module passwrapper
+module cbfix
 
 go 1.18
 
