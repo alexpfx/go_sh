@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"os"
 
-	"github.com/alexpfx/go_sh/dotfile/internal/dotfile"
+	"dotfile"
 
 	"log"
 )

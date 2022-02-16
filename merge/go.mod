@@ -1,4 +1,4 @@
-module passwrapper
+module merge
 
 go 1.18
 
