@@ -5,11 +5,6 @@ services:
     build:
       context: cbfix
       target: app
-  merge:
-    image: gosh/merge
-    build: 
-      context: merge
-      target: app
   pass-wrapper:
     image: gosh/pw
     build: 
