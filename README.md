@@ -7,3 +7,5 @@ fish_add_path $HOME/go/bin/
 repo init --help
 cfg --help
 ```
+
+sudo pacman -S go fish fisher bspwm kitty alacritty polybar rofi rofi-pass
